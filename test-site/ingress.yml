@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    ingress.kubernetes.io/ssl-redirect: "true"
+  name: test 
+  namespace: default
+spec:
+  rules:
+  - host: test.littlefluffyclouds.io
+    http:
+      paths:
+      - backend:
+          serviceName: test
+          servicePort: 80
+  tls:
+  - secretName: test.littlefluffyclouds.io
+    hosts:
+      - test.littlefluffyclouds.io

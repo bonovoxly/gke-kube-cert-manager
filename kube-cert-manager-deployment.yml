@@ -1,0 +1,50 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: kube-cert-manager
+  name: kube-cert-manager
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: kube-cert-manager
+      name: kube-cert-manager
+    spec:
+      serviceAccount: kube-cert-manager
+      containers:
+        - name: kube-cert-manager
+          env:
+          - name: GCE_PROJECT
+            value: <EXAMPLE-123456>
+          - name: GOOGLE_APPLICATION_CREDENTIALS
+            value: /opt/google/kube-cert-manager.json
+          image: bcawthra/kube-cert-manager:2017-12-10
+          args:
+            - "-data-dir=/var/lib/cert-manager"
+            #- "-acme-url=https://acme-staging.api.letsencrypt.org/directory"
+            # NOTE: the URL above points to the staging server, where you won't get real certs.
+            # Uncomment the line below to use the production LetsEncrypt server:
+            - "-acme-url=https://acme-v01.api.letsencrypt.org/directory"
+            # You can run multiple instances of kube-cert-manager for the same namespace(s),
+            # each watching for a different value for the 'class' label
+            - "-class=kube-cert-manager"
+            # You can choose to monitor only some namespaces, otherwise all namespaces will be monitored
+            #- "-namespaces=default,test"
+            # If you set a default email, you can omit the field/annotation from Certificates/Ingresses
+            - "-default-email=youremail@example.org"
+            # If you set a default provider, you can omit the field/annotation from Certificates/Ingresses
+            - "-default-provider=googlecloud"
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/cert-manager
+            - name: google-application-credentials
+              mountPath: /opt/google
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: kube-cert-manager-data
+        - name: google-application-credentials
+          secret:
+            secretName: kube-cert-manager-google

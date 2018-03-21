@@ -24,3 +24,10 @@ spec:
           requests:
             cpu: 10m
             memory: 20Mi
+        volumeMounts:
+          - name: test-index
+            mountPath: /usr/share/nginx/html
+      volumes:
+        - name: test-index
+          configMap:
+            name: test-index
